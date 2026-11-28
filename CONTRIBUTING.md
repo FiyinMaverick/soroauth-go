@@ -128,6 +128,7 @@ rather than across several documents. Run `make help` for the list.
 | `make e2e`           | builds the test contract with `stellar-cli` and runs `go test -tags e2e -v ./e2e/...`                 |
 | `make parity`        | installs the pinned Python SDK into `.venv-parity` and runs the parity harness and its tests          |
 | `make parity-rust`   | runs the Rust stellar-xdr parity harness and its tests (needs Rust 1.93.0)                            |
+| `make host-probe`    | runs the real Soroban host against delegate trees and asserts the limits in `docs/host-rules.md`      |
 | `make differential`  | regenerates the differential fuzzing corpus and checks it with the Go, JS and Python implementations  |
 | `make wasm`          | builds the js/wasm signing core to `wasm/dist/`                                                       |
 | `make wasm-check`    | builds the wasm core and replays every golden vector through it                                       |
@@ -369,6 +370,14 @@ script rather than prose, so it can run in CI:
   gh workflow run verify-release.yml --repo <owner>/soroauth-go \
     --ref <branch> -f self_test=true
   ```
+
+The tag also publishes `@soroauth/node`. `release.yml`'s `node-prebuilds` job
+calls `ci-node.yml` on the tagged commit, and `npm-node` refuses to publish
+unless all four platform pairs (`linux-x64`, `linux-arm64`, `darwin-x64`,
+`darwin-arm64`) are present and each binary's header matches the directory it is
+in, then runs `npm publish --provenance --access public`. Nothing in
+`bindings/node` is published from a branch, so a release always carries the
+prebuilds for the commit the tag names.
 
 Signing is keyless: the certificate comes from the workflow's GitHub OIDC
 identity, so no key exists in CI to leak or rotate. The flip side is that an
